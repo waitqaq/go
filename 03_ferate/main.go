@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"learning/03_ferate/calc"
+	"runtime/debug"
 )
 
 func main() {
@@ -14,16 +15,32 @@ func main() {
 	}
 }
 
+func recoverMainBody() {
+	if re := recover(); re != nil {
+		fmt.Printf("warning: catch critical error: %v \n", re)
+	}
+	debug.PrintStack()
+}
+
 func mainFateRateBody() {
+	defer recoverMainBody() // 捕获异常错误
 	weight, tall, age, _, sex := getMaterialsFromInput()
-	fateRate := calcFateRate(weight, tall, age, sex)
+	fateRate, err := calcFateRate(weight, tall, age, sex)
+	if err != nil {
+		fmt.Println("warning :计算体脂率出错", err)
+		return
+	}
 	fmt.Println(fateRate)
 }
 
-func calcFateRate(weight float64, tall float64, age int, sex string) float64 {
-	bmi := calc.CalcBMI(tall, weight)
-	fateRate := calc.CalcFatRate(bmi, age, sex)
-	return fateRate
+func calcFateRate(weight float64, tall float64, age int, sex string) (fateRate float64, err error) {
+	// 计算体脂率
+	bmi, err := calc.CalcBMI(tall, weight)
+	if err != nil {
+		return 0, err
+	}
+	fateRate = calc.CalcFatRate(bmi, age, sex)
+	return fateRate, err
 }
 
 func getMaterialsFromInput() (float64, float64, int, int, string) {
