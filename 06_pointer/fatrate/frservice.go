@@ -3,8 +3,8 @@ package main
 import "log"
 
 type fatRateService struct {
-	name string
-	s    *fatRateSuggestion
+	input InputService
+	s     *fatRateSuggestion
 }
 
 func (frsvc *fatRateService) GiveSuggestionToPerson(person *Person) string {
